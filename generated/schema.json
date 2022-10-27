@@ -27,9 +27,10 @@
             ],
             "properties": {
               "clientUrl": {
-                "type": "string"
+                "$ref": "#/components/schemas/Url"
               },
               "allowedUrls": {
+                "description": "TODO we should implement wildcards soon",
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -44,7 +45,8 @@
             ],
             "properties": {
               "enabled": {
-                "type": "boolean"
+                "type": "boolean",
+                "default": false
               }
             }
           },
@@ -55,7 +57,8 @@
             ],
             "properties": {
               "enabled": {
-                "type": "boolean"
+                "type": "boolean",
+                "default": true
               }
             }
           },
@@ -67,13 +70,17 @@
             ],
             "properties": {
               "default": {
-                "type": "string"
+                "$ref": "#/components/schemas/UserRole"
               },
               "allowed": {
                 "type": "array",
                 "items": {
-                  "type": "string"
-                }
+                  "$ref": "#/components/schemas/UserRole"
+                },
+                "default": [
+                  "user",
+                  "me"
+                ]
               }
             }
           },
@@ -93,7 +100,8 @@
                 ],
                 "properties": {
                   "enabled": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
                   }
                 }
               },
@@ -104,7 +112,8 @@
                 ],
                 "properties": {
                   "required": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": true
                   }
                 }
               },
@@ -118,13 +127,13 @@
                   "allowed": {
                     "type": "array",
                     "items": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/Domain"
                     }
                   },
                   "blocked": {
                     "type": "array",
                     "items": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/Domain"
                     }
                   }
                 }
@@ -139,13 +148,13 @@
                   "allowed": {
                     "type": "array",
                     "items": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/Email"
                     }
                   },
                   "blocked": {
                     "type": "array",
                     "items": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/Email"
                     }
                   }
                 }
@@ -161,13 +170,32 @@
             ],
             "properties": {
               "enabled": {
-                "type": "boolean"
+                "type": "boolean",
+                "default": true
               },
               "default": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "blank",
+                  "mp",
+                  "identicon",
+                  "monsterid",
+                  "wavatar",
+                  "retro",
+                  "robohash",
+                  "404"
+                ],
+                "default": "blank"
               },
               "rating": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "g",
+                  "r",
+                  "x",
+                  "pg"
+                ],
+                "default": "g"
               }
             }
           },
@@ -179,12 +207,12 @@
             ],
             "properties": {
               "default": {
-                "type": "string"
+                "$ref": "#/components/schemas/Locale"
               },
               "allowed": {
                 "type": "array",
                 "items": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/Locale"
                 }
               }
             }
@@ -203,12 +231,15 @@
                 ],
                 "properties": {
                   "enabled": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
                   }
                 }
               },
               "minLength": {
-                "type": "number"
+                "type": "number",
+                "minimum": 3,
+                "default": 9
               }
             }
           },
@@ -227,16 +258,24 @@
                 ],
                 "properties": {
                   "enabled": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
                   }
                 }
               },
               "provider": {
+                "type": [
+                  "string",
+                  "null"
+                ],
                 "enum": [
+                  "twilio",
                   null
-                ]
+                ],
+                "default": null
               },
               "twilio": {
+                "description": "TODO: required if provider is set to \"twilio\"",
                 "type": "object",
                 "required": [
                   "accountSid",
@@ -246,16 +285,56 @@
                 ],
                 "properties": {
                   "accountSid": {
-                    "type": "string"
+                    "default": "",
+                    "oneOf": [
+                      {
+                        "enum": [
+                          ""
+                        ]
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
                   },
                   "authToken": {
-                    "type": "string"
+                    "default": "",
+                    "oneOf": [
+                      {
+                        "enum": [
+                          ""
+                        ]
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
                   },
                   "from": {
-                    "type": "string"
+                    "default": "",
+                    "oneOf": [
+                      {
+                        "enum": [
+                          ""
+                        ]
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
                   },
                   "messagingServiceId": {
-                    "type": "string"
+                    "default": "",
+                    "oneOf": [
+                      {
+                        "enum": [
+                          ""
+                        ]
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
                   }
                 }
               }
@@ -271,21 +350,16 @@
             "properties": {
               "enabled": {
                 "type": "boolean",
-                "enum": [
-                  false
-                ]
+                "default": false
               },
               "relyingParty": {
                 "type": "object",
                 "required": [
-                  "name",
                   "origins"
                 ],
                 "properties": {
-                  "name": {
-                    "type": "string"
-                  },
                   "origins": {
+                    "description": "! In the cloud, we are using the application name\nname: string\nTODO to be further analysed",
                     "type": "array",
                     "items": {
                       "type": "string"
@@ -300,7 +374,8 @@
                 ],
                 "properties": {
                   "timeout": {
-                    "type": "number"
+                    "type": "number",
+                    "default": 60000
                   }
                 }
               }
@@ -314,7 +389,8 @@
             ],
             "properties": {
               "expiresIn": {
-                "type": "number"
+                "type": "number",
+                "default": 900
               },
               "customClaims": {
                 "type": "object",
@@ -331,7 +407,8 @@
             ],
             "properties": {
               "expiresIn": {
-                "type": "number"
+                "type": "number",
+                "default": 43200
               }
             }
           },
@@ -343,22 +420,30 @@
             ],
             "properties": {
               "enabled": {
-                "type": "boolean"
+                "type": "boolean",
+                "default": false
               },
               "totp": {
-                "type": "object",
-                "required": [
-                  "issuer"
-                ],
-                "properties": {
-                  "issuer": {
-                    "type": "string"
-                  }
-                }
+                "description": "TODO: required if mfa is enabled",
+                "type": "object"
               }
             }
           }
         },
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
+      "Domain": {
+        "type": "string",
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
+      "Email": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$",
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
+      "EnvironmentVariable": {
+        "type": "string",
+        "pattern": "[a-zA-Z_]{1,}[a-zA-Z0-9_]*",
         "$schema": "http://json-schema.org/draft-04/schema#"
       },
       "Functions": {
@@ -387,25 +472,18 @@
       "Global": {
         "type": "object",
         "required": [
-          "environment"
+          "environment",
+          "name"
         ],
         "properties": {
           "environment": {
             "description": "User-defined environment variables that are spread over all services",
-            "type": "object",
-            "additionalProperties": {
-              "oneOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            }
+            "type": "object"
+          },
+          "name": {
+            "description": "Name of the application",
+            "type": "string",
+            "default": "Nhost application"
           }
         },
         "$schema": "http://json-schema.org/draft-04/schema#"
@@ -417,13 +495,154 @@
         ],
         "properties": {
           "jwtSecrets": {
-            "description": "jwtSecrets:\n\t# Additional custom JWT secrets (one or many?)\n\t# The Hasura-auth secret would remain managed by Nhost and added to the list  of JWT secrets used by Hasura as long as hasura-auth is enabled.\n    - type: HS256\n      key: 0f987876650b4a085e64594fae9219e7781b17506bec02489ad061fba8cb22db\n\t\t\tissuer: additional-custom-jwt-secret",
             "type": "array",
             "items": {
-              "type": "object"
+              "$ref": "#/components/schemas/JWTSecret"
             }
           }
         },
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
+      "Ip": {
+        "type": "string",
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
+      "JWTSecret": {
+        "description": "* https://hasura.io/docs/latest/auth/authentication/jwt/",
+        "type": "object",
+        "properties": {
+          "claims_map": {
+            "type": "object"
+          },
+          "claims_format": {
+            "type": "string",
+            "enum": [
+              "json",
+              "stringified_json"
+            ],
+            "default": "json"
+          },
+          "audience": {
+            "type": "string"
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "allowed_skew": {
+            "type": "number"
+          },
+          "header": {
+            "type": "string"
+          }
+        },
+        "allOf": [
+          {
+            "oneOf": [
+              {
+                "required": [
+                  "type",
+                  "key"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "HS256",
+                      "HS512",
+                      "RS256",
+                      "RS384",
+                      "RS512",
+                      "Ed25519",
+                      "HS384"
+                    ],
+                    "default": "HS256"
+                  },
+                  "key": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "required": [
+                  "jwk_url"
+                ],
+                "properties": {
+                  "jwk_url": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "default": null
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "oneOf": [
+              {
+                "required": [
+                  "claims_namespace"
+                ],
+                "properties": {
+                  "claims_namespace": {
+                    "type": "string",
+                    "default": "https://hasura.io/jwt/claims"
+                  }
+                }
+              },
+              {
+                "required": [
+                  "claims_namespace_path"
+                ],
+                "properties": {
+                  "claims_namespace_path": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "not": {
+                  "anyOf": [
+                    {
+                      "required": [
+                        "claims_namespace"
+                      ],
+                      "properties": {
+                        "claims_namespace": {
+                          "type": "string",
+                          "default": "https://hasura.io/jwt/claims"
+                        }
+                      }
+                    },
+                    {
+                      "required": [
+                        "claims_namespace_path"
+                      ],
+                      "properties": {
+                        "claims_namespace_path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
+      "Locale": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 2,
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
+      "Port": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 65535,
         "$schema": "http://json-schema.org/draft-04/schema#"
       },
       "Smtp": {
@@ -439,35 +658,86 @@
         ],
         "properties": {
           "user": {
-            "type": "string"
+            "default": "",
+            "oneOf": [
+              {
+                "enum": [
+                  ""
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
           },
           "password": {
-            "type": "string"
+            "default": "",
+            "oneOf": [
+              {
+                "enum": [
+                  ""
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
           },
           "sender": {
             "description": "? more advanced validation?",
-            "type": "string"
+            "default": "",
+            "oneOf": [
+              {
+                "enum": [
+                  ""
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
           },
           "host": {
-            "description": "? more advanced validation?",
-            "type": "string"
+            "default": "",
+            "oneOf": [
+              {
+                "enum": [
+                  ""
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
           },
           "port": {
-            "description": "? more advanced validation?",
-            "type": "number"
+            "$ref": "#/components/schemas/Port"
           },
           "secure": {
-            "type": "boolean"
+            "type": "boolean",
+            "default": false
           },
           "method": {
-            "description": "? more advanced validation?",
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "PLAIN",
+              "LOGIN"
+            ],
+            "default": "PLAIN"
           }
         },
         "$schema": "http://json-schema.org/draft-04/schema#"
       },
       "Storage": {
         "type": "object",
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
+      "Url": {
+        "type": "string",
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
+      "UserRole": {
+        "type": "string",
         "$schema": "http://json-schema.org/draft-04/schema#"
       }
     }

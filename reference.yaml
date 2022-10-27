@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=./generated/schema.json
 global:
-  # * User-defined environment variables that would be spread over all services.
+  name: 'My application'
   environment:
     key: value
 
@@ -123,4 +123,4 @@ smtp: # In the cloud, it would only work in pro plan right? johan: Yes
   host: mailhog # ? only available when enabled is false ?
   port: 1025 # ? only available when enabled is false ?
   secure: false # ? only available when enabled is false ?
-  method: '' # ? what is it again?
+  method: PLAIN

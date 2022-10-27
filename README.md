@@ -9,11 +9,33 @@ Generates a [JSON schema](./generated/schema.json) from a [Cue schema](./schema.
 - [cue](https://cuelang.org/docs/install/)
 - [zx](https://github.com/google/zx)
 
+## Default values
+
+See the [generated defaults](./generated/defaults.yaml)
+
+To generate them:
+
+```sh
+echo '# yaml-language-server: $schema=./schema.json' > generated/defaults.yaml
+cue eval schema.cue -e '#Root' --out yaml >> generated/defaults.yaml
+```
+
 ## Generate the JSON Schema
+
+See the [generated JSON Schema](./generated/schema.json)
+
+To generate it:
 
 ```sh
 zx --install convert.mjs
 ```
+
+## Notes
+
+- JSON Schema limitations
+  - additional properties seem to be enabled (could be solved)
+  - "flex" struct definition is not supported (see `#Global.environment`). The problem is in the cue to OpenAPI export
+- Do we want optional fields or required fields with defaults?
 
 ## Resources
 

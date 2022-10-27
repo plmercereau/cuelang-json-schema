@@ -1,5 +1,7 @@
 import "list"
 
+import "strings"
+
 #Root: {
 	global:    #Global
 	hasura:    #Hasura
@@ -11,17 +13,13 @@ import "list"
 
 #Global: {
 	// User-defined environment variables that are spread over all services
-	environment: [string]: string | number | bool
+	environment: [#EnvironmentVariable]: string | number | bool
+	// Name of the application
+	name: string | *"Nhost application" // TODO no defaults?
 }
 
 #Hasura: {
-	jwtSecrets: [...{}]
-	// jwtSecrets:
-	// 	# Additional custom JWT secrets (one or many?)
-	// 	# The Hasura-auth secret would remain managed by Nhost and added to the list  of JWT secrets used by Hasura as long as hasura-auth is enabled.
-	//     - type: HS256
-	//       key: 0f987876650b4a085e64594fae9219e7781b17506bec02489ad061fba8cb22db
-	// 			issuer: additional-custom-jwt-secret
+	jwtSecrets: [...#JWTSecret]
 }
 
 #Storage: {}
@@ -34,98 +32,104 @@ import "list"
 
 #Auth: {
 	redirections: {
-		clientUrl: string
+		clientUrl: #Url | *"http://localhost:3000"
+		// TODO we should implement wildcards soon
 		allowedUrls: [...string]
 	}
 	anonymous: {
-		enabled: bool
+		enabled: bool | *false
 	}
 	signUp: {
-		enabled: bool
+		enabled: bool | *true
 	}
 
 	roles: {
-		default: string
-		allowed: [...string]
+		default: #UserRole | *"user"
+		allowed: [...#UserRole] | *[default, "me"]
 	}
 
 	email: {
 		passwordless: {
-			enabled: bool
+			enabled: bool | *false
 		}
 		verification: {
-			required: bool
+			required: bool | *true
 		}
 		domains: {
-			allowed: [...string]
-			blocked: [...string]
+			allowed: [...#Domain]
+			blocked: [...#Domain]
 		}
 		emails: {
-			allowed: [...string]
-			blocked: [...string]
+			allowed: [...#Email]
+			blocked: [...#Email]
 		}
 	}
 	gravatar: {
-		enabled: bool
-		default: string
-		rating:  string
+		enabled: bool | *true
+		default: "404" | "mp" | "identicon" | "monsterid" | "wavatar" | "retro" | "robohash" | *"blank"
+		rating:  "pg" | "r" | "x" | *"g"
 	}
 
 	locale: {
-		default: string
-		allowed: [...string]
+		default: #Locale | *"en"
+		allowed: [...#Locale] | *[locale]
 	}
 
 	password: {
 		hibp: {
-			enabled: bool
+			enabled: bool | *false
 		}
-		minLength: number
+		minLength: number & >=3 | *9
 	}
 
 	sms: {
 		passwordless: {
-			enabled: bool
+			enabled: bool | *false
 		}
-		provider: null // should be 'twilio' when sms passwordless is enabled
+		provider: "twilio" | *null
+		// TODO: required if provider is set to "twilio"
 		twilio: {
-			accountSid:         string
-			authToken:          string
-			from:               string
-			messagingServiceId: string
+			accountSid:         string | *'' // TODO no default?
+			authToken:          string | *'' // TODO no default?
+			from:               string | *'' // TODO no default?
+			messagingServiceId: string | *'' // TODO no default?
 		}
 	}
 
 	webauthn: {
-		enabled: false
+		enabled: bool | *false
 		relyingParty: {
-			name: string // not sure of this one. In the cloud, we are using the application name
+			// ! In the cloud, we are using the application name
+			// name: string
+			// TODO to be further analysed
 			origins: [...string]
 		}
 		attestation: {
-			timeout: number
+			timeout: number | *60000
 		}
 	}
 
 	accessToken: {
-		expiresIn: number
-		customClaims: [string]: string
+		expiresIn: number | *900
+		customClaims: [string]: string // TODO we could do better than string:string
 	}
 
 	refreshToken: {
-		expiresIn: number
+		expiresIn: number | *43200
 	}
 
 	mfa: {
-		enabled: bool
+		enabled: bool | *false
+		// TODO: required if mfa is enabled
 		totp: {
-
-			issuer: string
+			// ! probably better to use the application name
+			// issuer: string | *null
 		}
 	}
 
 }
 
+// TODO providers
 //   providers:
 //     apple:
 //       enabled: false
@@ -151,16 +155,46 @@ import "list"
 // 		# ... and other OAuth providers ...
 
 #Smtp: {
-	user:     string
-	password: string
+	user:     string | *'' // TODO defaults?
+	password: string | *'' // TODO defaults?
 	//   ? more advanced validation?
-	sender: string
-	//   ? more advanced validation? 
-	host: string
-	//   ? more advanced validation? 
-	port: number
-
-	secure: bool
-	//   ? more advanced validation? 
-	method: string
+	sender: string | *''        // TODO defaults?
+	host:   #Domain | #Ip | *'' // TODO defaults?
+	port:   #Port | *1025       // TODO defaults?
+	secure: bool | *false
+	method: "LOGIN" | *"PLAIN"
 }
+
+#EnvironmentVariable: =~"[a-zA-Z_]{1,}[a-zA-Z0-9_]*"
+#UserRole:            string
+#Url:                 string
+#Ip:                  string
+#Domain:              string
+#Port:                uint16
+#Email:               =~"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+#Locale:              string & strings.MinRunes(2) & strings.MaxRunes(2)
+
+// * https://hasura.io/docs/latest/auth/authentication/jwt/
+#JWTSecret:
+	({
+		type: "HS384" | "HS512" | "RS256" | "RS384" | "RS512" | "Ed25519" | *"HS256"
+		key:  string
+	} |
+	{
+		jwk_url: #Url | *null
+	}) &
+	{
+		claims_map?: {}
+		claims_format?: "stringified_json" | *"json"
+		audience?:      string
+		issuer?:        string
+		allowed_skew?:  number
+		header?:        string
+	} &
+	({
+		claims_namespace: string | *"https://hasura.io/jwt/claims"
+	} |
+	{
+		claims_namespace_path: string
+	} |
+	{})

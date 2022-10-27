@@ -1,0 +1,76 @@
+# yaml-language-server: $schema=./schema.json
+global:
+  environment: {}
+  name: Nhost application
+hasura:
+  jwtSecrets: []
+storage: {}
+functions:
+  node:
+    version: 16
+auth:
+  redirections:
+    clientUrl: http://localhost:3000
+    allowedUrls: []
+  anonymous:
+    enabled: false
+  signUp:
+    enabled: true
+  roles:
+    default: user
+    allowed:
+      - user
+      - me
+  email:
+    passwordless:
+      enabled: false
+    verification:
+      required: true
+    domains:
+      allowed: []
+      blocked: []
+    emails:
+      allowed: []
+      blocked: []
+  gravatar:
+    enabled: true
+    default: blank
+    rating: g
+  locale:
+    default: en
+    allowed: []
+  password:
+    hibp:
+      enabled: false
+    minLength: 9
+  sms:
+    passwordless:
+      enabled: false
+    provider: null
+    twilio:
+      accountSid: !!binary
+      authToken: !!binary
+      from: !!binary
+      messagingServiceId: !!binary
+  webauthn:
+    enabled: false
+    relyingParty:
+      origins: []
+    attestation:
+      timeout: 60000
+  accessToken:
+    expiresIn: 900
+    customClaims: {}
+  refreshToken:
+    expiresIn: 43200
+  mfa:
+    enabled: false
+    totp: {}
+smtp:
+  user: !!binary
+  password: !!binary
+  sender: !!binary
+  host: !!binary
+  port: 1025
+  secure: false
+  method: PLAIN
