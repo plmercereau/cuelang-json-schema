@@ -1,0 +1,505 @@
+{
+  "components": {
+    "schemas": {
+      "Auth": {
+        "type": "object",
+        "required": [
+          "redirections",
+          "anonymous",
+          "signUp",
+          "roles",
+          "email",
+          "gravatar",
+          "locale",
+          "password",
+          "sms",
+          "webauthn",
+          "accessToken",
+          "refreshToken",
+          "mfa"
+        ],
+        "properties": {
+          "redirections": {
+            "type": "object",
+            "required": [
+              "clientUrl",
+              "allowedUrls"
+            ],
+            "properties": {
+              "clientUrl": {
+                "type": "string"
+              },
+              "allowedUrls": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "anonymous": {
+            "type": "object",
+            "required": [
+              "enabled"
+            ],
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            }
+          },
+          "signUp": {
+            "type": "object",
+            "required": [
+              "enabled"
+            ],
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            }
+          },
+          "roles": {
+            "type": "object",
+            "required": [
+              "default",
+              "allowed"
+            ],
+            "properties": {
+              "default": {
+                "type": "string"
+              },
+              "allowed": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "email": {
+            "type": "object",
+            "required": [
+              "passwordless",
+              "verification",
+              "domains",
+              "emails"
+            ],
+            "properties": {
+              "passwordless": {
+                "type": "object",
+                "required": [
+                  "enabled"
+                ],
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "verification": {
+                "type": "object",
+                "required": [
+                  "required"
+                ],
+                "properties": {
+                  "required": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "domains": {
+                "type": "object",
+                "required": [
+                  "allowed",
+                  "blocked"
+                ],
+                "properties": {
+                  "allowed": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "blocked": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "emails": {
+                "type": "object",
+                "required": [
+                  "allowed",
+                  "blocked"
+                ],
+                "properties": {
+                  "allowed": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "blocked": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "gravatar": {
+            "type": "object",
+            "required": [
+              "enabled",
+              "default",
+              "rating"
+            ],
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "default": {
+                "type": "string"
+              },
+              "rating": {
+                "type": "string"
+              }
+            }
+          },
+          "locale": {
+            "type": "object",
+            "required": [
+              "default",
+              "allowed"
+            ],
+            "properties": {
+              "default": {
+                "type": "string"
+              },
+              "allowed": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "password": {
+            "type": "object",
+            "required": [
+              "hibp",
+              "minLength"
+            ],
+            "properties": {
+              "hibp": {
+                "type": "object",
+                "required": [
+                  "enabled"
+                ],
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "minLength": {
+                "type": "number"
+              }
+            }
+          },
+          "sms": {
+            "type": "object",
+            "required": [
+              "passwordless",
+              "provider",
+              "twilio"
+            ],
+            "properties": {
+              "passwordless": {
+                "type": "object",
+                "required": [
+                  "enabled"
+                ],
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "provider": {
+                "enum": [
+                  null
+                ]
+              },
+              "twilio": {
+                "type": "object",
+                "required": [
+                  "accountSid",
+                  "authToken",
+                  "from",
+                  "messagingServiceId"
+                ],
+                "properties": {
+                  "accountSid": {
+                    "type": "string"
+                  },
+                  "authToken": {
+                    "type": "string"
+                  },
+                  "from": {
+                    "type": "string"
+                  },
+                  "messagingServiceId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "webauthn": {
+            "type": "object",
+            "required": [
+              "enabled",
+              "relyingParty",
+              "attestation"
+            ],
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "enum": [
+                  false
+                ]
+              },
+              "relyingParty": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "origins"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "origins": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "attestation": {
+                "type": "object",
+                "required": [
+                  "timeout"
+                ],
+                "properties": {
+                  "timeout": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          },
+          "accessToken": {
+            "type": "object",
+            "required": [
+              "expiresIn",
+              "customClaims"
+            ],
+            "properties": {
+              "expiresIn": {
+                "type": "number"
+              },
+              "customClaims": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "refreshToken": {
+            "type": "object",
+            "required": [
+              "expiresIn"
+            ],
+            "properties": {
+              "expiresIn": {
+                "type": "number"
+              }
+            }
+          },
+          "mfa": {
+            "type": "object",
+            "required": [
+              "enabled",
+              "totp"
+            ],
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "totp": {
+                "type": "object",
+                "required": [
+                  "issuer"
+                ],
+                "properties": {
+                  "issuer": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
+      "Functions": {
+        "type": "object",
+        "required": [
+          "node"
+        ],
+        "properties": {
+          "node": {
+            "type": "object",
+            "required": [
+              "version"
+            ],
+            "properties": {
+              "version": {
+                "type": "integer",
+                "enum": [
+                  16
+                ]
+              }
+            }
+          }
+        },
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
+      "Global": {
+        "type": "object",
+        "required": [
+          "environment"
+        ],
+        "properties": {
+          "environment": {
+            "description": "User-defined environment variables that are spread over all services",
+            "type": "object",
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
+          }
+        },
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
+      "Hasura": {
+        "type": "object",
+        "required": [
+          "jwtSecrets"
+        ],
+        "properties": {
+          "jwtSecrets": {
+            "description": "jwtSecrets:\n\t# Additional custom JWT secrets (one or many?)\n\t# The Hasura-auth secret would remain managed by Nhost and added to the list  of JWT secrets used by Hasura as long as hasura-auth is enabled.\n    - type: HS256\n      key: 0f987876650b4a085e64594fae9219e7781b17506bec02489ad061fba8cb22db\n\t\t\tissuer: additional-custom-jwt-secret",
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
+      "Smtp": {
+        "type": "object",
+        "required": [
+          "user",
+          "password",
+          "sender",
+          "host",
+          "port",
+          "secure",
+          "method"
+        ],
+        "properties": {
+          "user": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "sender": {
+            "description": "? more advanced validation?",
+            "type": "string"
+          },
+          "host": {
+            "description": "? more advanced validation?",
+            "type": "string"
+          },
+          "port": {
+            "description": "? more advanced validation?",
+            "type": "number"
+          },
+          "secure": {
+            "type": "boolean"
+          },
+          "method": {
+            "description": "? more advanced validation?",
+            "type": "string"
+          }
+        },
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
+      "Storage": {
+        "type": "object",
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      }
+    }
+  },
+  "type": "object",
+  "required": [
+    "global",
+    "hasura",
+    "storage",
+    "functions",
+    "auth",
+    "smtp"
+  ],
+  "properties": {
+    "global": {
+      "$ref": "#/components/schemas/Global"
+    },
+    "hasura": {
+      "$ref": "#/components/schemas/Hasura"
+    },
+    "storage": {
+      "$ref": "#/components/schemas/Storage"
+    },
+    "functions": {
+      "$ref": "#/components/schemas/Functions"
+    },
+    "auth": {
+      "$ref": "#/components/schemas/Auth"
+    },
+    "smtp": {
+      "$ref": "#/components/schemas/Smtp"
+    }
+  },
+  "$schema": "http://json-schema.org/draft-04/schema#"
+}

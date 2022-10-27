@@ -1,0 +1,126 @@
+# yaml-language-server: $schema=./generated/schema.json
+global:
+  # * User-defined environment variables that would be spread over all services.
+  environment:
+    key: value
+
+hasura:
+  jwtSecrets:
+    - type: HS256
+      key: 0f987876650b4a085e64594fae9219e7781b17506bec02489ad061fba8cb22db
+      issuer: additional-custom-jwt-secret
+
+storage: {}
+
+functions:
+  node:
+    version: 16
+
+auth:
+  redirections:
+    clientUrl: http://localhost:3000
+    # serverUrl: probably not exposed in the config
+    allowedUrls: []
+
+  anonymous:
+    enabled: true
+
+  signUp:
+    enabled: true
+
+  roles:
+    default: user
+    allowed:
+      - user
+      - me
+
+  email:
+    passwordless:
+      enabled: true
+    verification:
+      required: true
+    domains:
+      allowed: []
+      blocked: []
+    emails:
+      allowed: []
+      blocked: []
+
+  gravatar:
+    enabled: true
+    default: blank
+    rating: g
+
+  locale:
+    default: en
+    allowed:
+      - en
+      - fr
+
+  password:
+    hibp:
+      enabled: false
+    minLength: 3
+
+  providers:
+    apple:
+      enabled: false
+      clientId: ''
+      keyId: ''
+      privateKey: ''
+      scope:
+        - name
+        - email
+      teamId: ''
+    bitbucket:
+      enabled: false
+      clientId: ''
+      clientSecret: ''
+    facebook:
+      enabled: false
+      clientId: ''
+      clientSecret: ''
+      scope:
+        - email
+        - photos
+        - displayName
+
+  sms:
+    passwordless:
+      enabled: false
+    provider: null # should be 'twilio' when sms passwordless is enabled
+    twilio:
+      accountSid: ''
+      authToken: ''
+      from: ''
+      messagingServiceId: ''
+
+  webauthn:
+    enabled: false
+    relyingParty:
+      name: '' # not sure of this one. In the cloud, it is the application name
+      origins: []
+    attestation:
+      timeout: 60000
+
+  accessToken:
+    expiresIn: 900
+    customClaims:
+      organisation-id: profile.organisation.id
+
+  refreshToken:
+    expiresIn: 43200
+
+  mfa:
+    enabled: true
+    totp:
+      issuer: nhost
+
+smtp: # In the cloud, it would only work in pro plan right? johan: Yes
+  user: user
+  password: password
+  sender: nhost@example.com
+  host: mailhog # ? only available when enabled is false ?
+  port: 1025 # ? only available when enabled is false ?
+  secure: false # ? only available when enabled is false ?
+  method: '' # ? what is it again?
