@@ -89,10 +89,10 @@ import "strings"
 		provider: "twilio" | *null
 		// TODO: required if provider is set to "twilio"
 		twilio: {
-			accountSid:         string | *'' // TODO no default?
-			authToken:          string | *'' // TODO no default?
-			from:               string | *'' // TODO no default?
-			messagingServiceId: string | *'' // TODO no default?
+			accountSid:         string | *"" // TODO no default?
+			authToken:          string | *"" // TODO no default?
+			from:               string | *"" // TODO no default?
+			messagingServiceId: string | *"" // TODO no default?
 		}
 	}
 
@@ -133,21 +133,21 @@ import "strings"
 //   providers:
 //     apple:
 //       enabled: false
-//       clientId: ''
-//       keyId: ''
-//       privateKey: ''
+//       clientId: ""
+//       keyId: ""
+//       privateKey: ""
 //       scope:
 //         - name
 //         - email
-//       teamId: ''
+//       teamId: ""
 //     bitbucket:
 //       enabled: false
-//       clientId: ''
-//       clientSecret: ''
+//       clientId: ""
+//       clientSecret: ""
 //     facebook:
 //       enabled: false
-//       clientId: ''
-//       clientSecret: ''
+//       clientId: ""
+//       clientSecret: ""
 //       scope:
 //         - email
 //         - photos
@@ -155,11 +155,11 @@ import "strings"
 // 		# ... and other OAuth providers ...
 
 #Smtp: {
-	user:     string | *'' // TODO defaults?
-	password: string | *'' // TODO defaults?
+	user:     string | *"" // TODO defaults?
+	password: string | *"" // TODO defaults?
 	//   ? more advanced validation?
-	sender: string | *''        // TODO defaults?
-	host:   #Domain | #Ip | *'' // TODO defaults?
+	sender: string | *""        // TODO defaults?
+	host:   #Domain | #Ip | *"" // TODO defaults?
 	port:   #Port | *1025       // TODO defaults?
 	secure: bool | *false
 	method: "LOGIN" | *"PLAIN"

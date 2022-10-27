@@ -48,10 +48,10 @@ auth:
       enabled: false
     provider: null
     twilio:
-      accountSid: !!binary
-      authToken: !!binary
-      from: !!binary
-      messagingServiceId: !!binary
+      accountSid: ""
+      authToken: ""
+      from: ""
+      messagingServiceId: ""
   webauthn:
     enabled: false
     relyingParty:
@@ -67,10 +67,10 @@ auth:
     enabled: false
     totp: {}
 smtp:
-  user: !!binary
-  password: !!binary
-  sender: !!binary
-  host: !!binary
+  user: ""
+  password: ""
+  sender: ""
+  host: ""
   port: 1025
   secure: false
   method: PLAIN
