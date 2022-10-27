@@ -10,7 +10,7 @@ Defines a basic Cue schema from out specifications, and generates the correspond
 ## Generate the JSON Schema
 
 ```sh
-zx --install generate.mjs
+zx --install convert.mjs
 ```
 
 ## Resources
