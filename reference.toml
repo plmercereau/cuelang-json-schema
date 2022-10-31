@@ -1,5 +1,6 @@
 [global]
 name = "My application"
+
 [global.environment]
 key = "value"
 
@@ -14,34 +15,46 @@ version = 16
 [auth.redirections]
 clientUrl = "http://localhost:3000"
 allowedUrls = []
+
 [auth.anonymous]
 enabled = true
+
 [auth.signUp]
 enabled = true
+
 [auth.roles]
 default = "user"
 allowed = ["user", "me"]
+
 [auth.email.passwordless]
 enabled = true
+
 [auth.email.verification]
 required = true
+
 [auth.email.domains]
 allowed = []
 blocked = []
+
 [auth.email.emails]
 allowed = []
 blocked = []
+
 [auth.gravatar]
 enabled = true
 default = "blank"
 rating = "g"
+
 [auth.locale]
 default = "en"
 allowed = ["en", "fr"]
+
 [auth.password]
 minLength = 3
+
 [auth.password.hibp]
 enabled = false
+
 [auth.providers.apple]
 enabled = false
 clientId = ""
@@ -49,37 +62,49 @@ keyId = ""
 privateKey = ""
 scope = ["name", "email"]
 teamId = ""
+
 [auth.providers.bitbucket]
 enabled = false
 clientId = ""
 clientSecret = ""
+
 [auth.providers.facebook]
 enabled = false
 clientId = ""
 clientSecret = ""
 scope = ["email", "photos", "displayName"]
+
 [auth.sms.passwordless]
 enabled = false
+
 [auth.sms.twilio]
 accountSid = ""
 authToken = ""
 from = ""
 messagingServiceId = ""
+
 [auth.webauthn]
 enabled = false
+
 [auth.webauthn.relyingParty]
 name = ""
 origins = []
+
 [auth.webauthn.attestation]
 timeout = 60000
+
 [auth.accessToken]
 expiresIn = 900
+
 [auth.accessToken.customClaims]
 organisation-id = "profile.organisation.id"
+
 [auth.refreshToken]
 expiresIn = 43200
+
 [auth.mfa]
 enabled = true
+
 [auth.mfa.totp]
 issuer = "nhost"
 
