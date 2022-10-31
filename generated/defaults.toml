@@ -1,0 +1,77 @@
+[global]
+  name = "Nhost application"
+  [global.environment]
+
+[hasura]
+  jwtSecrets = []
+
+[storage]
+
+[functions]
+  [functions.node]
+    version = 16
+
+[auth]
+  [auth.redirections]
+    clientUrl = "http://localhost:3000"
+    allowedUrls = []
+  [auth.anonymous]
+    enabled = false
+  [auth.signUp]
+    enabled = true
+  [auth.roles]
+    default = "user"
+    allowed = ["user", "me"]
+  [auth.email]
+    [auth.email.passwordless]
+      enabled = false
+    [auth.email.verification]
+      required = true
+    [auth.email.domains]
+      allowed = []
+      blocked = []
+    [auth.email.emails]
+      allowed = []
+      blocked = []
+  [auth.gravatar]
+    enabled = true
+    default = "blank"
+    rating = "g"
+  [auth.locale]
+    default = "en"
+    allowed = []
+  [auth.password]
+    minLength = 9
+    [auth.password.hibp]
+      enabled = false
+  [auth.sms]
+    [auth.sms.passwordless]
+      enabled = false
+    [auth.sms.twilio]
+      accountSid = ""
+      authToken = ""
+      from = ""
+      messagingServiceId = ""
+  [auth.webauthn]
+    enabled = false
+    [auth.webauthn.relyingParty]
+      origins = []
+    [auth.webauthn.attestation]
+      timeout = 60000
+  [auth.accessToken]
+    expiresIn = 900
+    [auth.accessToken.customClaims]
+  [auth.refreshToken]
+    expiresIn = 43200
+  [auth.mfa]
+    enabled = false
+    [auth.mfa.totp]
+
+[smtp]
+  user = ""
+  password = ""
+  sender = ""
+  host = ""
+  port = 1025
+  secure = false
+  method = "PLAIN"

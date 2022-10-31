@@ -8,6 +8,13 @@ Generates a [JSON schema](./generated/schema.json) from a [Cue schema](./schema.
 
 - [cue](https://cuelang.org/docs/install/)
 - [zx](https://github.com/google/zx)
+- [yj](https://github.com/sclevine/yj)
+
+## Convert reference from Yaml to Toml
+
+```sh
+yj -iyt < reference.yaml > reference.toml
+```
 
 ## Default values
 
@@ -16,8 +23,13 @@ See the [generated defaults](./generated/defaults.yaml)
 To generate them:
 
 ```sh
+# Generate default values in Yaml
 echo '# yaml-language-server: $schema=./schema.json' > generated/defaults.yaml
 cue eval schema.cue -e '#Root' --out yaml >> generated/defaults.yaml
+
+# Generate default values in Toml
+cue eval schema.cue -e '#Root' --out json | yj -jti >> generated/defaults.toml
+
 ```
 
 ## Generate the JSON Schema
