@@ -13,7 +13,8 @@ Generates a [JSON schema](./generated/schema.json) from a [Cue schema](./schema.
 ## Convert reference from Yaml to Toml
 
 ```sh
-yj -iyt < reference.yaml > reference.toml
+yj -yt < reference.yaml > reference.toml
+# Then manually remove empty properties
 ```
 
 ## Default values
@@ -28,7 +29,8 @@ echo '# yaml-language-server: $schema=./schema.json' > generated/defaults.yaml
 cue eval schema.cue -e '#Root' --out yaml >> generated/defaults.yaml
 
 # Generate default values in Toml
-cue eval schema.cue -e '#Root' --out json | yj -jti >> generated/defaults.toml
+cue eval schema.cue -e '#Root' --out json | yj -jt > generated/defaults.toml
+# Then manually remove empty properties
 
 ```
 
