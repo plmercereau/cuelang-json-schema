@@ -51,6 +51,7 @@ import (
 
 	roles: {
 		default: #UserRole | *"user"
+		// TODO Order shouldn't matter
 		allowed: [default, "me", ...#UserRole] | *[default, "me"]
 	}
 
@@ -78,6 +79,7 @@ import (
 
 	locale: {
 		default: #Locale | *"en"
+		// TODO Order shouldn't matter
 		allowed: [default, ...#Locale] | *[default]
 	}
 
