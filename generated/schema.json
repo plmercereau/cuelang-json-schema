@@ -16,7 +16,8 @@
           "webauthn",
           "accessToken",
           "refreshToken",
-          "mfa"
+          "mfa",
+          "providers"
         ],
         "properties": {
           "redirections": {
@@ -30,7 +31,7 @@
                 "$ref": "#/components/schemas/Url"
               },
               "allowedUrls": {
-                "description": "TODO we should implement wildcards soon",
+                "description": "We should implement wildcards soon, so the #Url type should not be used here",
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -74,9 +75,17 @@
               },
               "allowed": {
                 "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/UserRole"
-                },
+                "items": [
+                  {
+                    "$ref": "#/components/schemas/Auth.roles.default"
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "me"
+                    ]
+                  }
+                ],
                 "default": [
                   "user",
                   "me"
@@ -127,13 +136,13 @@
                   "allowed": {
                     "type": "array",
                     "items": {
-                      "$ref": "#/components/schemas/Domain"
+                      "$ref": "#/components/schemas/FQDN"
                     }
                   },
                   "blocked": {
                     "type": "array",
                     "items": {
-                      "$ref": "#/components/schemas/Domain"
+                      "$ref": "#/components/schemas/FQDN"
                     }
                   }
                 }
@@ -211,9 +220,67 @@
               },
               "allowed": {
                 "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/Locale"
-                }
+                "default": [
+                  "en"
+                ],
+                "oneOf": [
+                  {
+                    "allOf": [
+                      {
+                        "items": [
+                          {
+                            "$ref": "#/components/schemas/Auth.locale.default"
+                          }
+                        ]
+                      },
+                      {
+                        "not": {
+                          "anyOf": [
+                            {
+                              "minItems": 1,
+                              "items": [
+                                {
+                                  "$ref": "#/components/schemas/Auth.locale.default"
+                                }
+                              ],
+                              "additionalItems": {
+                                "$ref": "#/components/schemas/Locale"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "minItems": 1,
+                        "items": [
+                          {
+                            "$ref": "#/components/schemas/Auth.locale.default"
+                          }
+                        ],
+                        "additionalItems": {
+                          "$ref": "#/components/schemas/Locale"
+                        }
+                      },
+                      {
+                        "not": {
+                          "anyOf": [
+                            {
+                              "items": [
+                                {
+                                  "$ref": "#/components/schemas/Auth.locale.default"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
             }
           },
@@ -246,9 +313,7 @@
           "sms": {
             "type": "object",
             "required": [
-              "passwordless",
-              "provider",
-              "twilio"
+              "passwordless"
             ],
             "properties": {
               "passwordless": {
@@ -262,122 +327,18 @@
                     "default": false
                   }
                 }
-              },
-              "provider": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "enum": [
-                  "twilio",
-                  null
-                ],
-                "default": null
-              },
-              "twilio": {
-                "description": "TODO: required if provider is set to \"twilio\"",
-                "type": "object",
-                "required": [
-                  "accountSid",
-                  "authToken",
-                  "from",
-                  "messagingServiceId"
-                ],
-                "properties": {
-                  "accountSid": {
-                    "default": "",
-                    "oneOf": [
-                      {
-                        "enum": [
-                          ""
-                        ]
-                      },
-                      {
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "authToken": {
-                    "default": "",
-                    "oneOf": [
-                      {
-                        "enum": [
-                          ""
-                        ]
-                      },
-                      {
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "from": {
-                    "default": "",
-                    "oneOf": [
-                      {
-                        "enum": [
-                          ""
-                        ]
-                      },
-                      {
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "messagingServiceId": {
-                    "default": "",
-                    "oneOf": [
-                      {
-                        "enum": [
-                          ""
-                        ]
-                      },
-                      {
-                        "type": "string"
-                      }
-                    ]
-                  }
-                }
               }
             }
           },
           "webauthn": {
             "type": "object",
             "required": [
-              "enabled",
-              "relyingParty",
-              "attestation"
+              "enabled"
             ],
             "properties": {
               "enabled": {
                 "type": "boolean",
                 "default": false
-              },
-              "relyingParty": {
-                "type": "object",
-                "required": [
-                  "origins"
-                ],
-                "properties": {
-                  "origins": {
-                    "description": "! In the cloud, we are using the application name\nname: string\nTODO to be further analysed",
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                }
-              },
-              "attestation": {
-                "type": "object",
-                "required": [
-                  "timeout"
-                ],
-                "properties": {
-                  "timeout": {
-                    "type": "number",
-                    "default": 60000
-                  }
-                }
               }
             }
           },
@@ -393,9 +354,23 @@
                 "default": 900
               },
               "customClaims": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string"
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "key",
+                    "value"
+                  ],
+                  "properties": {
+                    "key": {
+                      "description": "We should ideally enforce the keys and values format here",
+                      "type": "string",
+                      "pattern": "[a-zA-Z_]{1,}[a-zA-Z0-9_]*"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
@@ -415,25 +390,375 @@
           "mfa": {
             "type": "object",
             "required": [
-              "enabled",
-              "totp"
+              "enabled"
             ],
             "properties": {
               "enabled": {
                 "type": "boolean",
                 "default": false
+              }
+            }
+          },
+          "providers": {
+            "type": "object",
+            "required": [
+              "apple",
+              "azuread",
+              "bitbucket",
+              "discord",
+              "facebook",
+              "github",
+              "gitlab",
+              "google",
+              "linkedin",
+              "spotify",
+              "strava",
+              "twitch",
+              "twitter",
+              "windowslive",
+              "workos"
+            ],
+            "properties": {
+              "apple": {
+                "description": "Will be implemented soon\ndefaults: {\n\tsignUp: {\n\t\tenabled: true\n\t}\n}",
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                },
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/OauthProvider"
+                  },
+                  {
+                    "required": [
+                      "enabled"
+                    ]
+                  }
+                ]
               },
-              "totp": {
-                "description": "TODO: required if mfa is enabled",
-                "type": "object"
+              "azuread": {
+                "type": "object",
+                "default": {
+                  "enabled": false
+                },
+                "oneOf": [
+                  {
+                    "required": [
+                      "tenant",
+                      "enabled",
+                      "clientId",
+                      "clientSecret"
+                    ],
+                    "properties": {
+                      "tenant": {
+                        "type": "string",
+                        "default": "common"
+                      },
+                      "enabled": {
+                        "type": "boolean",
+                        "enum": [
+                          true
+                        ]
+                      },
+                      "clientId": {
+                        "type": "string"
+                      },
+                      "clientSecret": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/StandardOauthProviderDisabled"
+                  }
+                ]
+              },
+              "bitbucket": {
+                "$ref": "#/components/schemas/StandardOauthProvider"
+              },
+              "discord": {
+                "$ref": "#/components/schemas/StandardOauthProvider"
+              },
+              "facebook": {
+                "$ref": "#/components/schemas/StandardOauthProvider"
+              },
+              "github": {
+                "$ref": "#/components/schemas/StandardOauthProvider"
+              },
+              "gitlab": {
+                "$ref": "#/components/schemas/StandardOauthProvider"
+              },
+              "google": {
+                "$ref": "#/components/schemas/StandardOauthProvider"
+              },
+              "linkedin": {
+                "$ref": "#/components/schemas/StandardOauthProvider"
+              },
+              "spotify": {
+                "$ref": "#/components/schemas/StandardOauthProvider"
+              },
+              "strava": {
+                "$ref": "#/components/schemas/StandardOauthProvider"
+              },
+              "twitch": {
+                "$ref": "#/components/schemas/StandardOauthProvider"
+              },
+              "twitter": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                },
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/OauthProvider"
+                  },
+                  {
+                    "required": [
+                      "enabled"
+                    ]
+                  }
+                ]
+              },
+              "windowslive": {
+                "$ref": "#/components/schemas/StandardOauthProvider"
+              },
+              "workos": {
+                "type": "object",
+                "default": {
+                  "enabled": false
+                },
+                "oneOf": [
+                  {
+                    "oneOf": [
+                      {
+                        "allOf": [
+                          {
+                            "required": [
+                              "enabled",
+                              "clientId",
+                              "clientSecret"
+                            ],
+                            "properties": {
+                              "enabled": {
+                                "type": "boolean",
+                                "enum": [
+                                  true
+                                ]
+                              },
+                              "clientId": {
+                                "type": "string"
+                              },
+                              "clientSecret": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          {
+                            "not": {
+                              "anyOf": [
+                                {
+                                  "required": [
+                                    "enabled",
+                                    "clientId",
+                                    "organization",
+                                    "clientSecret"
+                                  ],
+                                  "properties": {
+                                    "enabled": {
+                                      "type": "boolean",
+                                      "enum": [
+                                        true
+                                      ]
+                                    },
+                                    "clientId": {
+                                      "type": "string"
+                                    },
+                                    "organization": {
+                                      "type": "string"
+                                    },
+                                    "clientSecret": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                {
+                                  "required": [
+                                    "enabled",
+                                    "clientId",
+                                    "connection",
+                                    "clientSecret"
+                                  ],
+                                  "properties": {
+                                    "enabled": {
+                                      "type": "boolean",
+                                      "enum": [
+                                        true
+                                      ]
+                                    },
+                                    "clientId": {
+                                      "type": "string"
+                                    },
+                                    "connection": {
+                                      "type": "string"
+                                    },
+                                    "clientSecret": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                {
+                                  "required": [
+                                    "enabled",
+                                    "clientId",
+                                    "domain",
+                                    "clientSecret"
+                                  ],
+                                  "properties": {
+                                    "enabled": {
+                                      "type": "boolean",
+                                      "enum": [
+                                        true
+                                      ]
+                                    },
+                                    "clientId": {
+                                      "type": "string"
+                                    },
+                                    "domain": {
+                                      "type": "string"
+                                    },
+                                    "clientSecret": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "required": [
+                          "enabled",
+                          "clientId",
+                          "organization",
+                          "clientSecret"
+                        ],
+                        "properties": {
+                          "enabled": {
+                            "type": "boolean",
+                            "enum": [
+                              true
+                            ]
+                          },
+                          "clientId": {
+                            "type": "string"
+                          },
+                          "organization": {
+                            "type": "string"
+                          },
+                          "clientSecret": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      {
+                        "required": [
+                          "enabled",
+                          "clientId",
+                          "connection",
+                          "clientSecret"
+                        ],
+                        "properties": {
+                          "enabled": {
+                            "type": "boolean",
+                            "enum": [
+                              true
+                            ]
+                          },
+                          "clientId": {
+                            "type": "string"
+                          },
+                          "connection": {
+                            "type": "string"
+                          },
+                          "clientSecret": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      {
+                        "required": [
+                          "enabled",
+                          "clientId",
+                          "domain",
+                          "clientSecret"
+                        ],
+                        "properties": {
+                          "enabled": {
+                            "type": "boolean",
+                            "enum": [
+                              true
+                            ]
+                          },
+                          "clientId": {
+                            "type": "string"
+                          },
+                          "domain": {
+                            "type": "string"
+                          },
+                          "clientSecret": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "$ref": "#/components/schemas/StandardOauthProviderDisabled"
+                  }
+                ]
               }
             }
           }
         },
         "$schema": "http://json-schema.org/draft-04/schema#"
       },
-      "Domain": {
-        "type": "string",
+      "Config": {
+        "type": "object",
+        "required": [
+          "global",
+          "hasura",
+          "storage",
+          "functions",
+          "auth",
+          "smtp"
+        ],
+        "properties": {
+          "global": {
+            "$ref": "#/components/schemas/Global"
+          },
+          "hasura": {
+            "$ref": "#/components/schemas/Hasura"
+          },
+          "storage": {
+            "$ref": "#/components/schemas/Storage"
+          },
+          "functions": {
+            "$ref": "#/components/schemas/Functions"
+          },
+          "auth": {
+            "$ref": "#/components/schemas/Auth"
+          },
+          "smtp": {
+            "$ref": "#/components/schemas/Smtp"
+          }
+        },
         "$schema": "http://json-schema.org/draft-04/schema#"
       },
       "Email": {
@@ -441,9 +766,8 @@
         "pattern": "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$",
         "$schema": "http://json-schema.org/draft-04/schema#"
       },
-      "EnvironmentVariable": {
+      "FQDN": {
         "type": "string",
-        "pattern": "[a-zA-Z_]{1,}[a-zA-Z0-9_]*",
         "$schema": "http://json-schema.org/draft-04/schema#"
       },
       "Functions": {
@@ -478,7 +802,23 @@
         "properties": {
           "environment": {
             "description": "User-defined environment variables that are spread over all services",
-            "type": "object"
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "value"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "pattern": "[a-zA-Z_]{1,}[a-zA-Z0-9_]*"
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "name": {
             "description": "Name of the application",
@@ -503,8 +843,7 @@
         },
         "$schema": "http://json-schema.org/draft-04/schema#"
       },
-      "Ip": {
-        "type": "string",
+      "IP": {
         "$schema": "http://json-schema.org/draft-04/schema#"
       },
       "JWTSecret": {
@@ -639,6 +978,19 @@
         "maxLength": 2,
         "$schema": "http://json-schema.org/draft-04/schema#"
       },
+      "OauthProvider": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
       "Port": {
         "type": "integer",
         "minimum": 0,
@@ -658,55 +1010,23 @@
         ],
         "properties": {
           "user": {
-            "default": "",
-            "oneOf": [
-              {
-                "enum": [
-                  ""
-                ]
-              },
-              {
-                "type": "string"
-              }
-            ]
+            "type": "string"
           },
           "password": {
-            "default": "",
-            "oneOf": [
-              {
-                "enum": [
-                  ""
-                ]
-              },
-              {
-                "type": "string"
-              }
-            ]
+            "type": "string"
           },
           "sender": {
             "description": "? more advanced validation?",
-            "default": "",
-            "oneOf": [
-              {
-                "enum": [
-                  ""
-                ]
-              },
-              {
-                "type": "string"
-              }
-            ]
+            "type": "string",
+            "default": ""
           },
           "host": {
-            "default": "",
             "oneOf": [
               {
-                "enum": [
-                  ""
-                ]
+                "$ref": "#/components/schemas/FQDN"
               },
               {
-                "type": "string"
+                "$ref": "#/components/schemas/IP"
               }
             ]
           },
@@ -728,6 +1048,73 @@
         },
         "$schema": "http://json-schema.org/draft-04/schema#"
       },
+      "StandardOauthProvider": {
+        "type": "object",
+        "default": {
+          "enabled": false
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/StandardOauthProviderEnabled"
+          },
+          {
+            "$ref": "#/components/schemas/StandardOauthProviderDisabled"
+          }
+        ],
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
+      "StandardOauthProviderDisabled": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "enum": [
+              false
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/OauthProvider"
+          },
+          {
+            "required": [
+              "enabled"
+            ]
+          }
+        ],
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
+      "StandardOauthProviderEnabled": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "clientSecret": {
+            "type": "string"
+          }
+        },
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/OauthProvider"
+          },
+          {
+            "required": [
+              "enabled",
+              "clientId",
+              "clientSecret"
+            ]
+          }
+        ],
+        "$schema": "http://json-schema.org/draft-04/schema#"
+      },
       "Storage": {
         "type": "object",
         "$schema": "http://json-schema.org/draft-04/schema#"
@@ -741,35 +1128,5 @@
         "$schema": "http://json-schema.org/draft-04/schema#"
       }
     }
-  },
-  "type": "object",
-  "required": [
-    "global",
-    "hasura",
-    "storage",
-    "functions",
-    "auth",
-    "smtp"
-  ],
-  "properties": {
-    "global": {
-      "$ref": "#/components/schemas/Global"
-    },
-    "hasura": {
-      "$ref": "#/components/schemas/Hasura"
-    },
-    "storage": {
-      "$ref": "#/components/schemas/Storage"
-    },
-    "functions": {
-      "$ref": "#/components/schemas/Functions"
-    },
-    "auth": {
-      "$ref": "#/components/schemas/Auth"
-    },
-    "smtp": {
-      "$ref": "#/components/schemas/Smtp"
-    }
-  },
-  "$schema": "http://json-schema.org/draft-04/schema#"
+  }
 }

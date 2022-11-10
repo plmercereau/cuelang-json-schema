@@ -25,11 +25,11 @@ To generate them:
 
 ```sh
 # Generate default values in Yaml
-echo '# yaml-language-server: $schema=./schema.json' > generated/defaults.yaml
-cue eval schema.cue -e '#Root' --out yaml >> generated/defaults.yaml
+echo '#yaml-language-server: $schema=./schema.json' > generated/defaults.yaml
+cue eval schema.cue -e '#Config' --out yaml >> generated/defaults.yaml
 
 # Generate default values in Toml
-cue eval schema.cue -e '#Root' --out json | yj -jt > generated/defaults.toml
+cue eval schema.cue -e '#Config' --out json | yj -jt > generated/defaults.toml
 # Then manually remove empty properties
 
 ```

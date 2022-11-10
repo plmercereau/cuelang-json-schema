@@ -1,8 +1,9 @@
-# yaml-language-server: $schema=./generated/schema.json
+#yaml-language-server: $schema=./generated/schema.json
 global:
   name: 'My application'
   environment:
-    key: value
+    - key: CUSTOM_ENV_VAR
+      value: custom value
 
 hasura:
   jwtSecrets:
@@ -18,7 +19,7 @@ functions:
 
 auth:
   redirections:
-    clientUrl: http://localhost:3000
+    clientUrl: '{{PATH}}'
     # serverUrl: probably not exposed in the config
     allowedUrls: []
 
@@ -64,31 +65,27 @@ auth:
 
   providers:
     apple:
-      enabled: false
+      enabled: true
       clientId: ''
       keyId: ''
       privateKey: ''
-      scope:
-        - name
-        - email
       teamId: ''
     bitbucket:
-      enabled: false
+      enabled: true
       clientId: ''
       clientSecret: ''
     facebook:
       enabled: false
+    workos:
+      enabled: true
       clientId: ''
       clientSecret: ''
-      scope:
-        - email
-        - photos
-        - displayName
+      organization: 'xyz'
 
   sms:
     passwordless:
-      enabled: false
-    provider: null # should be 'twilio' when sms passwordless is enabled
+      enabled: true
+    provider: 'twilio'
     twilio:
       accountSid: ''
       authToken: ''
@@ -98,7 +95,7 @@ auth:
   webauthn:
     enabled: false
     relyingParty:
-      name: '' # not sure of this one. In the cloud, it is the application name
+      name: ''
       origins: []
     attestation:
       timeout: 60000
@@ -106,7 +103,8 @@ auth:
   accessToken:
     expiresIn: 900
     customClaims:
-      organisation-id: profile.organisation.id
+      - key: organisation-id
+        value: profile.organisation.id
 
   refreshToken:
     expiresIn: 43200

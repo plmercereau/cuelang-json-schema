@@ -1,8 +1,11 @@
-import "list"
+package config
 
-import "strings"
+import (
+	"net"
+	"strings"
+)
 
-#Root: {
+#Config: {
 	global:    #Global
 	hasura:    #Hasura
 	storage:   #Storage
@@ -13,9 +16,12 @@ import "strings"
 
 #Global: {
 	// User-defined environment variables that are spread over all services
-	environment: [#EnvironmentVariable]: string | number | bool
+	environment: [...{
+		key:   =~"[a-zA-Z_]{1,}[a-zA-Z0-9_]*"
+		value: string
+	}] | *[]
 	// Name of the application
-	name: string | *"Nhost application" // TODO no defaults?
+	name: string | *"Nhost application"
 }
 
 #Hasura: {
@@ -33,7 +39,7 @@ import "strings"
 #Auth: {
 	redirections: {
 		clientUrl: #Url | *"http://localhost:3000"
-		// TODO we should implement wildcards soon
+		// We should implement wildcards soon, so the #Url type should not be used here
 		allowedUrls: [...string]
 	}
 	anonymous: {
@@ -45,7 +51,7 @@ import "strings"
 
 	roles: {
 		default: #UserRole | *"user"
-		allowed: [...#UserRole] | *[default, "me"]
+		allowed: [default, "me", ...#UserRole] | *[default, "me"]
 	}
 
 	email: {
@@ -56,8 +62,8 @@ import "strings"
 			required: bool | *true
 		}
 		domains: {
-			allowed: [...#Domain]
-			blocked: [...#Domain]
+			allowed: [...net.FQDN]
+			blocked: [...net.FQDN]
 		}
 		emails: {
 			allowed: [...#Email]
@@ -72,7 +78,7 @@ import "strings"
 
 	locale: {
 		default: #Locale | *"en"
-		allowed: [...#Locale] | *[locale]
+		allowed: [default, ...#Locale] | *[default]
 	}
 
 	password: {
@@ -86,32 +92,41 @@ import "strings"
 		passwordless: {
 			enabled: bool | *false
 		}
-		provider: "twilio" | *null
-		// TODO: required if provider is set to "twilio"
-		twilio: {
-			accountSid:         string | *"" // TODO no default?
-			authToken:          string | *"" // TODO no default?
-			from:               string | *"" // TODO no default?
-			messagingServiceId: string | *"" // TODO no default?
+		if (passwordless.enabled == true) {
+			provider: "twilio"
+			if (provider == "twilio") {
+				{twilio: {
+					accountSid:         string
+					authToken:          string
+					from:               string
+					messagingServiceId: string
+				}}
+			}
 		}
 	}
 
 	webauthn: {
 		enabled: bool | *false
-		relyingParty: {
-			// ! In the cloud, we are using the application name
-			// name: string
-			// TODO to be further analysed
-			origins: [...string]
-		}
-		attestation: {
-			timeout: number | *60000
+		if (enabled == true) {
+			relyingParty: {
+				name:    string
+				origins: [...#Url] | *[redirections.clientUrl]
+			}
+			attestation: {
+				timeout: number | *60000
+			}
 		}
 	}
 
 	accessToken: {
-		expiresIn: number | *900
-		customClaims: [string]: string // TODO we could do better than string:string
+		expiresIn:    number | *900
+		customClaims: [
+				...{
+				// We should ideally enforce the keys and values format here
+				key:   =~"[a-zA-Z_]{1,}[a-zA-Z0-9_]*"
+				value: string
+			},
+		] | *[]
 	}
 
 	refreshToken: {
@@ -120,59 +135,96 @@ import "strings"
 
 	mfa: {
 		enabled: bool | *false
-		// TODO: required if mfa is enabled
-		totp: {
-			// ! probably better to use the application name
-			// issuer: string | *null
+		if (enabled == true) {
+			totp: {
+				// * Better to use the application name
+				issuer: string | *null
+			}
 		}
 	}
 
+	providers: {
+		// Will be implemented soon
+		// defaults: {
+		// 	signUp: {
+		// 		enabled: true
+		// 	}
+		// }
+		apple: {
+			#OauthProvider
+			enabled: bool | *false
+			if (enabled == true) {
+				clientId:   string
+				keyId:      string
+				teamId:     string
+				privateKey: string
+			}
+		}
+		azuread: {
+			#StandardOauthProviderEnabled
+			tenant: string | *"common"
+		} | *#StandardOauthProviderDisabled
+
+		bitbucket: #StandardOauthProvider
+		discord:   #StandardOauthProvider
+		facebook:  #StandardOauthProvider
+		github:    #StandardOauthProvider
+		gitlab:    #StandardOauthProvider
+		google:    #StandardOauthProvider
+		linkedin:  #StandardOauthProvider
+		spotify:   #StandardOauthProvider
+		strava:    #StandardOauthProvider
+		twitch:    #StandardOauthProvider
+		twitter: {
+			#OauthProvider
+			enabled: bool | *false
+			if (enabled == true) {
+				consumerKey:    string
+				consumerSecret: string
+			}
+		}
+		windowslive: #StandardOauthProvider
+		workos:      {
+			#StandardOauthProviderEnabled
+			{domain: string} | {organization: string} | {connection: string} | *{}
+		} | *#StandardOauthProviderDisabled
+	}
 }
 
-// TODO providers
-//   providers:
-//     apple:
-//       enabled: false
-//       clientId: ""
-//       keyId: ""
-//       privateKey: ""
-//       scope:
-//         - name
-//         - email
-//       teamId: ""
-//     bitbucket:
-//       enabled: false
-//       clientId: ""
-//       clientSecret: ""
-//     facebook:
-//       enabled: false
-//       clientId: ""
-//       clientSecret: ""
-//       scope:
-//         - email
-//         - photos
-//         - displayName
-// 		# ... and other OAuth providers ...
+#OauthProvider: {
+	enabled: bool | *false
+}
+
+#StandardOauthProviderEnabled: {
+	#OauthProvider
+	enabled:      true
+	clientId:     string
+	clientSecret: string
+}
+
+#StandardOauthProviderDisabled: {
+	#OauthProvider
+	enabled: false
+}
+
+#StandardOauthProvider: #StandardOauthProviderEnabled | *#StandardOauthProviderDisabled
 
 #Smtp: {
-	user:     string | *"" // TODO defaults?
-	password: string | *"" // TODO defaults?
+	user:     string
+	password: string
 	//   ? more advanced validation?
-	sender: string | *""        // TODO defaults?
-	host:   #Domain | #Ip | *"" // TODO defaults?
-	port:   #Port | *1025       // TODO defaults?
+	sender: string | *"" // TODO defaults?
+	host:   net.FQDN | net.IP
+	port:   #Port | *1025
 	secure: bool | *false
 	method: "LOGIN" | *"PLAIN"
 }
 
-#EnvironmentVariable: =~"[a-zA-Z_]{1,}[a-zA-Z0-9_]*"
-#UserRole:            string
-#Url:                 string
-#Ip:                  string
-#Domain:              string
-#Port:                uint16
-#Email:               =~"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
-#Locale:              string & strings.MinRunes(2) & strings.MaxRunes(2)
+#UserRole: string
+#Url:      string
+#Port:     uint16
+#Email:    =~"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+#Locale:   string & strings.MinRunes(2) & strings.MaxRunes(2)
 
 // * https://hasura.io/docs/latest/auth/authentication/jwt/
 #JWTSecret:
@@ -196,5 +248,4 @@ import "strings"
 	} |
 	{
 		claims_namespace_path: string
-	} |
-	{})
+	} | *{})
