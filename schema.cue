@@ -92,14 +92,21 @@ import (
 		passwordless: {
 			enabled: bool | *false
 		}
+		provider?: "twilio"
+		twilio: {
+			accountSid?:         string
+			authToken?:          string
+			from?:               string
+			messagingServiceId?: string
+		}
 		if (passwordless.enabled == true) {
-			provider: "twilio"
+			provider: _
 			if (provider == "twilio") {
 				{twilio: {
-					accountSid:         string
-					authToken:          string
-					from:               string
-					messagingServiceId: string
+					accountSid:         _
+					authToken:          _
+					from:               _
+					messagingServiceId: _
 				}}
 			}
 		}
@@ -107,13 +114,16 @@ import (
 
 	webauthn: {
 		enabled: bool | *false
+		relyingParty: {
+			name?:    string
+			origins?: [...#Url] | *[redirections.clientUrl]
+		}
+		attestation: {
+			timeout: number | *60000
+		}
 		if (enabled == true) {
 			relyingParty: {
-				name:    string
-				origins: [...#Url] | *[redirections.clientUrl]
-			}
-			attestation: {
-				timeout: number | *60000
+				name: _
 			}
 		}
 	}
@@ -135,10 +145,12 @@ import (
 
 	mfa: {
 		enabled: bool | *false
+		totp: {
+			issuer?: string
+		}
 		if (enabled == true) {
 			totp: {
-				// * Better to use the application name
-				issuer: string | *null
+				issuer: _
 			}
 		}
 	}
@@ -152,7 +164,7 @@ import (
 		// }
 		apple: {
 			#OauthProvider
-			enabled: bool | *false
+			enabled: _
 			if (enabled == true) {
 				clientId:   string
 				keyId:      string
@@ -161,9 +173,9 @@ import (
 			}
 		}
 		azuread: {
-			#StandardOauthProviderEnabled
+			#StandardOauthProvider
 			tenant: string | *"common"
-		} | *#StandardOauthProviderDisabled
+		}
 
 		bitbucket: #StandardOauthProvider
 		discord:   #StandardOauthProvider
@@ -177,17 +189,23 @@ import (
 		twitch:    #StandardOauthProvider
 		twitter: {
 			#OauthProvider
-			enabled: bool | *false
+			enabled:         _
+			consumerKey?:    string
+			consumerSecret?: string
 			if (enabled == true) {
-				consumerKey:    string
-				consumerSecret: string
+				consumerKey:    _
+				consumerSecret: _
 			}
 		}
 		windowslive: #StandardOauthProvider
-		workos:      {
-			#StandardOauthProviderEnabled
-			{domain: string} | {organization: string} | {connection: string} | *{}
-		} | *#StandardOauthProviderDisabled
+		workos: {
+			#StandardOauthProvider
+			enabled: _
+			if (enabled == true) {
+				{domain: string} | {organization: string} | {connection: string} | *{}
+			}
+
+		}
 	}
 }
 
@@ -195,29 +213,26 @@ import (
 	enabled: bool | *false
 }
 
-#StandardOauthProviderEnabled: {
+#StandardOauthProvider: {
 	#OauthProvider
-	enabled:      true
-	clientId:     string
-	clientSecret: string
-}
+	enabled:       _
+	clientId?:     string
+	clientSecret?: string
+	if (enabled == true) {
+		clientId:     _
+		clientSecret: _
+	}
 
-#StandardOauthProviderDisabled: {
-	#OauthProvider
-	enabled: false
 }
-
-#StandardOauthProvider: #StandardOauthProviderEnabled | *#StandardOauthProviderDisabled
 
 #Smtp: {
 	user:     string
 	password: string
-	//   ? more advanced validation?
-	sender: string | *"" // TODO defaults?
-	host:   net.FQDN | net.IP
-	port:   #Port | *1025
-	secure: bool | *false
-	method: "LOGIN" | *"PLAIN"
+	sender:   string | *""
+	host:     net.FQDN | net.IP
+	port:     #Port | *1025
+	secure:   bool | *false
+	method:   "LOGIN" | *"PLAIN"
 }
 
 #UserRole: string
