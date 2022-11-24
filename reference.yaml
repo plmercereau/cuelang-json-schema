@@ -105,6 +105,8 @@ auth:
     customClaims:
       - key: organisation-id
         value: profile.organisation.id
+      - key: projects
+        value: profile.projects[]
 
   refreshToken:
     expiresIn: 43200

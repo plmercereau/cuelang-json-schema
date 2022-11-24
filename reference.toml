@@ -91,6 +91,10 @@ expiresIn = 900
 [[auth.accessToken.customClaims]]
 key = "organisation-id"
 value = "profile.organisation.id"
+
+[[auth.accessToken.customClaims]]
+key = "projects"
+value = "profile.projects[]"
 [auth.refreshToken]
 expiresIn = 43200
 [auth.mfa]
