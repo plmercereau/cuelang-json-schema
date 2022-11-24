@@ -165,8 +165,7 @@ import (
 		// 	}
 		// }
 		apple: {
-			#OauthProvider
-			enabled: _
+			enabled: bool | *false
 			if (enabled == true) {
 				clientId:   string
 				keyId:      string
@@ -190,8 +189,7 @@ import (
 		strava:    #StandardOauthProvider
 		twitch:    #StandardOauthProvider
 		twitter: {
-			#OauthProvider
-			enabled:         _
+			enabled:         bool | *false
 			consumerKey?:    string
 			consumerSecret?: string
 			if (enabled == true) {
@@ -202,7 +200,7 @@ import (
 		windowslive: #StandardOauthProvider
 		workos: {
 			#StandardOauthProvider
-			enabled: _
+			enabled: bool | *false
 			if (enabled == true) {
 				{domain: string} | {organization: string} | {connection: string} | *{}
 			}
@@ -211,13 +209,8 @@ import (
 	}
 }
 
-#OauthProvider: {
-	enabled: bool | *false
-}
-
 #StandardOauthProvider: {
-	#OauthProvider
-	enabled:       _
+	enabled:       bool | *false
 	clientId?:     string
 	clientSecret?: string
 	if (enabled == true) {

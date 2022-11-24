@@ -74,6 +74,7 @@
                 "$ref": "#/components/schemas/UserRole"
               },
               "allowed": {
+                "description": "TODO Order shouldn't matter",
                 "type": "array",
                 "items": [
                   {
@@ -219,6 +220,7 @@
                 "$ref": "#/components/schemas/Locale"
               },
               "allowed": {
+                "description": "TODO Order shouldn't matter",
                 "type": "array",
                 "default": [
                   "en"
@@ -313,7 +315,8 @@
           "sms": {
             "type": "object",
             "required": [
-              "passwordless"
+              "passwordless",
+              "twilio"
             ],
             "properties": {
               "passwordless": {
@@ -327,18 +330,72 @@
                     "default": false
                   }
                 }
+              },
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "twilio"
+                ]
+              },
+              "twilio": {
+                "type": "object",
+                "properties": {
+                  "accountSid": {
+                    "type": "string"
+                  },
+                  "authToken": {
+                    "type": "string"
+                  },
+                  "from": {
+                    "type": "string"
+                  },
+                  "messagingServiceId": {
+                    "type": "string"
+                  }
+                }
               }
             }
           },
           "webauthn": {
             "type": "object",
             "required": [
-              "enabled"
+              "enabled",
+              "relyingParty",
+              "attestation"
             ],
             "properties": {
               "enabled": {
                 "type": "boolean",
                 "default": false
+              },
+              "relyingParty": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "origins": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Url"
+                    },
+                    "default": [
+                      "http://localhost:3000"
+                    ]
+                  }
+                }
+              },
+              "attestation": {
+                "type": "object",
+                "required": [
+                  "timeout"
+                ],
+                "properties": {
+                  "timeout": {
+                    "type": "number",
+                    "default": 60000
+                  }
+                }
               }
             }
           },
@@ -390,12 +447,21 @@
           "mfa": {
             "type": "object",
             "required": [
-              "enabled"
+              "enabled",
+              "totp"
             ],
             "properties": {
               "enabled": {
                 "type": "boolean",
                 "default": false
+              },
+              "totp": {
+                "type": "object",
+                "properties": {
+                  "issuer": {
+                    "type": "string"
+                  }
+                }
               }
             }
           },
@@ -422,57 +488,32 @@
               "apple": {
                 "description": "Will be implemented soon\ndefaults: {\n\tsignUp: {\n\t\tenabled: true\n\t}\n}",
                 "type": "object",
+                "required": [
+                  "enabled"
+                ],
                 "properties": {
                   "enabled": {
                     "type": "boolean",
                     "default": false
                   }
-                },
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/OauthProvider"
-                  },
-                  {
-                    "required": [
-                      "enabled"
-                    ]
-                  }
-                ]
+                }
               },
               "azuread": {
                 "type": "object",
-                "default": {
-                  "enabled": false
+                "properties": {
+                  "tenant": {
+                    "type": "string",
+                    "default": "common"
+                  }
                 },
-                "oneOf": [
+                "allOf": [
                   {
-                    "required": [
-                      "tenant",
-                      "enabled",
-                      "clientId",
-                      "clientSecret"
-                    ],
-                    "properties": {
-                      "tenant": {
-                        "type": "string",
-                        "default": "common"
-                      },
-                      "enabled": {
-                        "type": "boolean",
-                        "enum": [
-                          true
-                        ]
-                      },
-                      "clientId": {
-                        "type": "string"
-                      },
-                      "clientSecret": {
-                        "type": "string"
-                      }
-                    }
+                    "$ref": "#/components/schemas/StandardOauthProvider"
                   },
                   {
-                    "$ref": "#/components/schemas/StandardOauthProviderDisabled"
+                    "required": [
+                      "tenant"
+                    ]
                   }
                 ]
               },
@@ -508,6 +549,27 @@
               },
               "twitter": {
                 "type": "object",
+                "required": [
+                  "enabled"
+                ],
+                "properties": {
+                  "enabled": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "consumerKey": {
+                    "type": "string"
+                  },
+                  "consumerSecret": {
+                    "type": "string"
+                  }
+                }
+              },
+              "windowslive": {
+                "$ref": "#/components/schemas/StandardOauthProvider"
+              },
+              "workos": {
+                "type": "object",
                 "properties": {
                   "enabled": {
                     "type": "boolean",
@@ -516,211 +578,12 @@
                 },
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/OauthProvider"
+                    "$ref": "#/components/schemas/StandardOauthProvider"
                   },
                   {
                     "required": [
                       "enabled"
                     ]
-                  }
-                ]
-              },
-              "windowslive": {
-                "$ref": "#/components/schemas/StandardOauthProvider"
-              },
-              "workos": {
-                "type": "object",
-                "default": {
-                  "enabled": false
-                },
-                "oneOf": [
-                  {
-                    "oneOf": [
-                      {
-                        "allOf": [
-                          {
-                            "required": [
-                              "enabled",
-                              "clientId",
-                              "clientSecret"
-                            ],
-                            "properties": {
-                              "enabled": {
-                                "type": "boolean",
-                                "enum": [
-                                  true
-                                ]
-                              },
-                              "clientId": {
-                                "type": "string"
-                              },
-                              "clientSecret": {
-                                "type": "string"
-                              }
-                            }
-                          },
-                          {
-                            "not": {
-                              "anyOf": [
-                                {
-                                  "required": [
-                                    "enabled",
-                                    "clientId",
-                                    "organization",
-                                    "clientSecret"
-                                  ],
-                                  "properties": {
-                                    "enabled": {
-                                      "type": "boolean",
-                                      "enum": [
-                                        true
-                                      ]
-                                    },
-                                    "clientId": {
-                                      "type": "string"
-                                    },
-                                    "organization": {
-                                      "type": "string"
-                                    },
-                                    "clientSecret": {
-                                      "type": "string"
-                                    }
-                                  }
-                                },
-                                {
-                                  "required": [
-                                    "enabled",
-                                    "clientId",
-                                    "connection",
-                                    "clientSecret"
-                                  ],
-                                  "properties": {
-                                    "enabled": {
-                                      "type": "boolean",
-                                      "enum": [
-                                        true
-                                      ]
-                                    },
-                                    "clientId": {
-                                      "type": "string"
-                                    },
-                                    "connection": {
-                                      "type": "string"
-                                    },
-                                    "clientSecret": {
-                                      "type": "string"
-                                    }
-                                  }
-                                },
-                                {
-                                  "required": [
-                                    "enabled",
-                                    "clientId",
-                                    "domain",
-                                    "clientSecret"
-                                  ],
-                                  "properties": {
-                                    "enabled": {
-                                      "type": "boolean",
-                                      "enum": [
-                                        true
-                                      ]
-                                    },
-                                    "clientId": {
-                                      "type": "string"
-                                    },
-                                    "domain": {
-                                      "type": "string"
-                                    },
-                                    "clientSecret": {
-                                      "type": "string"
-                                    }
-                                  }
-                                }
-                              ]
-                            }
-                          }
-                        ]
-                      },
-                      {
-                        "required": [
-                          "enabled",
-                          "clientId",
-                          "organization",
-                          "clientSecret"
-                        ],
-                        "properties": {
-                          "enabled": {
-                            "type": "boolean",
-                            "enum": [
-                              true
-                            ]
-                          },
-                          "clientId": {
-                            "type": "string"
-                          },
-                          "organization": {
-                            "type": "string"
-                          },
-                          "clientSecret": {
-                            "type": "string"
-                          }
-                        }
-                      },
-                      {
-                        "required": [
-                          "enabled",
-                          "clientId",
-                          "connection",
-                          "clientSecret"
-                        ],
-                        "properties": {
-                          "enabled": {
-                            "type": "boolean",
-                            "enum": [
-                              true
-                            ]
-                          },
-                          "clientId": {
-                            "type": "string"
-                          },
-                          "connection": {
-                            "type": "string"
-                          },
-                          "clientSecret": {
-                            "type": "string"
-                          }
-                        }
-                      },
-                      {
-                        "required": [
-                          "enabled",
-                          "clientId",
-                          "domain",
-                          "clientSecret"
-                        ],
-                        "properties": {
-                          "enabled": {
-                            "type": "boolean",
-                            "enum": [
-                              true
-                            ]
-                          },
-                          "clientId": {
-                            "type": "string"
-                          },
-                          "domain": {
-                            "type": "string"
-                          },
-                          "clientSecret": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "$ref": "#/components/schemas/StandardOauthProviderDisabled"
                   }
                 ]
               }
@@ -978,19 +841,6 @@
         "maxLength": 2,
         "$schema": "http://json-schema.org/draft-04/schema#"
       },
-      "OauthProvider": {
-        "type": "object",
-        "required": [
-          "enabled"
-        ],
-        "properties": {
-          "enabled": {
-            "type": "boolean",
-            "default": false
-          }
-        },
-        "$schema": "http://json-schema.org/draft-04/schema#"
-      },
       "Port": {
         "type": "integer",
         "minimum": 0,
@@ -1016,7 +866,6 @@
             "type": "string"
           },
           "sender": {
-            "description": "? more advanced validation?",
             "type": "string",
             "default": ""
           },
@@ -1050,49 +899,13 @@
       },
       "StandardOauthProvider": {
         "type": "object",
-        "default": {
-          "enabled": false
-        },
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/StandardOauthProviderEnabled"
-          },
-          {
-            "$ref": "#/components/schemas/StandardOauthProviderDisabled"
-          }
+        "required": [
+          "enabled"
         ],
-        "$schema": "http://json-schema.org/draft-04/schema#"
-      },
-      "StandardOauthProviderDisabled": {
-        "type": "object",
         "properties": {
           "enabled": {
             "type": "boolean",
-            "enum": [
-              false
-            ]
-          }
-        },
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/OauthProvider"
-          },
-          {
-            "required": [
-              "enabled"
-            ]
-          }
-        ],
-        "$schema": "http://json-schema.org/draft-04/schema#"
-      },
-      "StandardOauthProviderEnabled": {
-        "type": "object",
-        "properties": {
-          "enabled": {
-            "type": "boolean",
-            "enum": [
-              true
-            ]
+            "default": false
           },
           "clientId": {
             "type": "string"
@@ -1101,18 +914,6 @@
             "type": "string"
           }
         },
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/OauthProvider"
-          },
-          {
-            "required": [
-              "enabled",
-              "clientId",
-              "clientSecret"
-            ]
-          }
-        ],
         "$schema": "http://json-schema.org/draft-04/schema#"
       },
       "Storage": {
